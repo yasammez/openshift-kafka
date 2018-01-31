@@ -3,7 +3,7 @@ FROM centos7:latest
 ENV KAFKA_USER=zookeeper \
     JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk \
     KAFKA_VERSION=0.11.0.2 \
-    SCALA_VERSION=2.10 \
+    SCALA_VERSION=2.11 \
     KAFKA_HOME=/opt/kafka
 
 COPY fix-permissions /usr/local/bin
