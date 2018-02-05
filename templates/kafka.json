@@ -113,7 +113,7 @@
                                 "command": [
                                     "sh",
                                     "-c",
-                                    "bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=$ZOOKEEPER_HOST --override advertised.host.name=$KAFKA_ADVERTISED_HOST_NAME --override broker.id=$(hostname | awk -F'-' '{print $2}')"
+                                    "bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=$ZOOKEEPER_HOST --override advertised.host.name=$KAFKA_ADVERTISED_HOST_NAME --override broker.id=$(hostname | awk -F'-' '{print $2}') --override advertised.listeners=INTERNAL://$KAFKA_ADVERTISED_HOST_NAME,PLAINTEXT://10.237.233.10:9092"
                                 ],
                                 "ports": [
                                     {
