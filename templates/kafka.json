@@ -113,11 +113,15 @@
                                 "command": [
                                     "sh",
                                     "-c",
-                                    "bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=$ZOOKEEPER_HOST --override advertised.host.name=$KAFKA_ADVERTISED_HOST_NAME --override broker.id=$(hostname | awk -F'-' '{print $2}') --override advertised.listeners=INTERNAL://$KAFKA_ADVERTISED_HOST_NAME,PLAINTEXT://10.237.233.10:9092"
+                                    "bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=$ZOOKEEPER_HOST --override advertised.host.name=$KAFKA_ADVERTISED_HOST_NAME --override broker.id=$(hostname | awk -F'-' '{print $2}') --override listener.security.protocol.map=INTERNAL_PLAINTEXT:PLAINTEXT,EXTERNAL_PLAINTEXT:PLAINTEXT --override advertised.listeners=INTERNAL_PLAINTEXT://${KAFKA_ADVERTISED_HOST_NAME}:9093,EXTERNAL_PLAINTEXT://10.237.233.10:9092 --override listeners=INTERNAL_PLAINTEXT://0.0.0.0:9093,EXTERNAL_PLAINTEXT://0.0.0.0:9092 --override inter.broker.listener.name=INTERNAL_PLAINTEXT --override default.replication.factor=3 --override num.partitions=3 --override delete.topic.enable=true"
                                 ],
                                 "ports": [
                                     {
                                         "containerPort": 9092,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "containerPort": 9093,
                                         "protocol": "TCP"
                                     }
                                 ],
