@@ -38,7 +38,7 @@
     {
       "description": "Externer Port für die Kommunikation mit diesem Broker",
       "name": "KAFKA_EXTERNAL_PORT",
-      "value": "9095",
+      "value": "9094",
       "required": true
     },
     {
@@ -64,7 +64,7 @@
             "name": "extern",
             "protocol": "TCP",
             "port": "${KAFKA_EXTERNAL_PORT}",
-            "targetPort": 9095
+            "targetPort": 9094
           }
         ],
         "selector": {
@@ -138,11 +138,11 @@
                 "command": [
                   "sh",
                   "-c",
-                  "bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=$ZOOKEEPER_HOST --override advertised.host.name=$KAFKA_ADVERTISED_HOST_NAME --override broker.id=${KAFKA_BROKER_ID} --override listener.security.protocol.map=INTERNAL_PLAINTEXT:PLAINTEXT,EXTERNAL_PLAINTEXT:PLAINTEXT --override advertised.listeners=INTERNAL_PLAINTEXT://${KAFKA_ADVERTISED_HOST_NAME}:9092,EXTERNAL_PLAINTEXT://${PUBLIC_IP}:${KAFKA_EXTERNAL_PORT} --override listeners=INTERNAL_PLAINTEXT://0.0.0.0:9092,EXTERNAL_PLAINTEXT://0.0.0.0:${KAFKA_EXTERNAL_PORT} --override inter.broker.listener.name=INTERNAL_PLAINTEXT --override default.replication.factor=3 --override num.partitions=3 --override delete.topic.enable=true"
+                  "bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=$ZOOKEEPER_HOST --override advertised.host.name=$KAFKA_ADVERTISED_HOST_NAME --override broker.id=${KAFKA_BROKER_ID} --override listener.security.protocol.map=INTERNAL_PLAINTEXT:PLAINTEXT,EXTERNAL_PLAINTEXT:PLAINTEXT --override advertised.listeners=INTERNAL_PLAINTEXT://${KAFKA_ADVERTISED_HOST_NAME}:9091,EXTERNAL_PLAINTEXT://${PUBLIC_IP}:${KAFKA_EXTERNAL_PORT} --override listeners=INTERNAL_PLAINTEXT://0.0.0.0:9091,EXTERNAL_PLAINTEXT://0.0.0.0:${KAFKA_EXTERNAL_PORT} --override inter.broker.listener.name=INTERNAL_PLAINTEXT --override default.replication.factor=3 --override num.partitions=3 --override delete.topic.enable=true"
                 ],
                 "ports": [
                   {
-                    "containerPort": 9092,
+                    "containerPort": 9091,
                     "protocol": "TCP"
                   },
                   {
