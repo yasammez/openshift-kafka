@@ -1,0 +1,213 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "labels": {
+    "template": "Kafka-Services"
+  },
+  "metadata": {
+    "name": "ellie-template",
+    "annotation": {
+      "description": "Ellie ist die ältere von Franz Kafkas Schwestern"
+    }
+  },
+  "parameters": [
+    {
+      "description": "Name dieses Brokers",
+      "name": "SERVICE_NAME",
+      "required": true,
+      "value": "ellie"
+    },
+    {
+      "description": "ImageStream Quelle",
+      "name": "IS_SOURCE",
+      "required": true,
+      "value": "latest"
+    },
+    {
+      "description": "Host Name for Zookeeper",
+      "name": "ZOOKEEPER_HOST",
+      "value": "zookeeper",
+      "required": true
+    },
+    {
+      "description": "Kafka Broker ID",
+      "name": "KAFKA_BROKER_ID",
+      "value": "0",
+      "required": true
+    },
+    {
+      "description": "Externer Port für die Kommunikation mit diesem Broker",
+      "name": "KAFKA_EXTERNAL_PORT",
+      "value": "9093",
+      "required": true
+    },
+    {
+      "description": "Öffentliche IP-Adresse für diesen Service",
+      "name": "PUBLIC_IP",
+      "value": "10.237.233.10",
+      "required": true
+    }
+  ],
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${SERVICE_NAME}",
+        "labels": {
+          "application": "kafka"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "extern",
+            "protocol": "TCP",
+            "port": "${KAFKA_EXTERNAL_PORT}",
+            "targetPort": 9093
+          }
+        ],
+        "selector": {
+          "application": "kafka",
+          "name": "${SERVICE_NAME}"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "DeploymentConfig",
+      "metadata": {
+        "name": "${SERVICE_NAME}"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "name": "${SERVICE_NAME}",
+          "application": "kafka"
+        },
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 300,
+            "maxUnavailable": 0,
+            "maxSurge": 1
+          },
+          "resources": {
+            "requests": {
+              "cpu": "10m",
+              "memory": "10Mi"
+            }
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${SERVICE_NAME}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "kafka:latest",
+                "namespace": "ia2-ewu"
+              }
+            }
+          }
+        ],
+        "template": {
+          "metadata": {
+            "labels": {
+              "name": "${SERVICE_NAME}",
+              "application": "kafka"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${SERVICE_NAME}",
+                "image": "kafka",
+                "imagePullPolicy": "Always",
+                "command": [
+                  "sh",
+                  "-c",
+                  "bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=$ZOOKEEPER_HOST --override advertised.host.name=$KAFKA_ADVERTISED_HOST_NAME --override broker.id=${KAFKA_BROKER_ID} --override listener.security.protocol.map=INTERNAL_PLAINTEXT:PLAINTEXT,EXTERNAL_PLAINTEXT:PLAINTEXT --override advertised.listeners=INTERNAL_PLAINTEXT://${KAFKA_ADVERTISED_HOST_NAME}:9092,EXTERNAL_PLAINTEXT://${PUBLIC_IP}:${KAFKA_EXTERNAL_PORT} --override listeners=INTERNAL_PLAINTEXT://0.0.0.0:9092,EXTERNAL_PLAINTEXT://0.0.0.0:${KAFKA_EXTERNAL_PORT} --override inter.broker.listener.name=INTERNAL_PLAINTEXT --override default.replication.factor=3 --override num.partitions=3 --override delete.topic.enable=true"
+                ],
+                "ports": [
+                  {
+                    "containerPort": 9092,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": "${KAFKA_EXTERNAL_PORT}",
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "KAFKA_ADVERTISED_HOST_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "status.podIP"
+                      }
+                    }
+                  },
+                  {
+                    "name": "ZOOKEEPER_HOST",
+                    "value": "${ZOOKEEPER_HOST}"
+                  },
+                  {
+                    "name": "KAFKA_BROKER_ID",
+                    "value": "${KAFKA_BROKER_ID}"
+                  },
+                  {
+                    "name": "KAFKA_EXTERNAL_PORT",
+                    "value": "${KAFKA_EXTERNAL_PORT}"
+                  },
+                  {
+                    "name": "PUBLIC_IP",
+                    "value": "${PUBLIC_IP}"
+                  }
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "256m",
+                    "memory": "256Mi"
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "datadir",
+                    "mountPath": "/opt/kafka/data"
+                  }
+                ]
+              }
+            ],
+            "securityContext": {},
+            "restartPolicy": "Always",
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationGracePeriodSeconds": 30,
+            "dnsPolicy": "ClusterFirst",
+            "volumes": [
+              {
+                "name": "datadir",
+                "persistentVolumeClaim": {
+                  "claimName": "${SERVICE_NAME}-claim"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "status": {}
+    }
+  ]
+}
