@@ -181,6 +181,10 @@
                   "requests": {
                     "cpu": "256m",
                     "memory": "256Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "4Gi"
                   }
                 },
                 "volumeMounts": [
