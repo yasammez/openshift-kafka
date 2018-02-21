@@ -17,6 +17,8 @@ RUN INSTALL_PKGS="gettext tar zip unzip hostname java-1.8.0-openjdk" && \
     mkdir -p $KAFKA_HOME/logs && \
     /usr/local/bin/fix-permissions $KAFKA_HOME
 
+COPY server.properties /opt/kafka/config
+
 RUN useradd -u 1002 -r -c "Kafka User" $KAFKA_USER
 
 WORKDIR "/opt/kafka"
